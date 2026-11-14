@@ -2,8 +2,6 @@ DROP DATABASE IF EXISTS collegedb;
 CREATE DATABASE collegedb;
 USE collegedb;
 
--- 1. CREATE TABLES
-
 CREATE TABLE PUBLISHER (
     NAME VARCHAR(20) PRIMARY KEY,
     ADDRESS VARCHAR(50),
@@ -51,8 +49,6 @@ CREATE TABLE BOOK_LENDING (
     FOREIGN KEY (BRANCH_ID) REFERENCES LIBRARY_BRANCH(BRANCH_ID)
 );
 
--- 2. INSERT VALUES
-
 INSERT INTO PUBLISHER VALUES
 ('PEARSON', 'Bangalore', '9876543210'),
 ('MCGRAW HILL', 'Chennai', '9876543211'),
@@ -66,11 +62,11 @@ INSERT INTO BOOK VALUES
 ('B005', 'PYTHON PROGRAMMING', 'PEARSON', 2020);
 
 INSERT INTO BOOK_AUTHORS VALUES
-('B001', 'KORTH'),
-('B002', 'GALVIN'),
-('B003', 'TANENBAUM'),
-('B004', 'HERBERT SCHILDT'),
-('B005', 'MARK LUTZ');
+('B001', 'Kavya'),
+('B002', 'Khawana'),
+('B003', 'Arjun'),
+('B004', 'Aditya'),
+('B005', 'Meghana');
 
 INSERT INTO LIBRARY_BRANCH VALUES
 ('BR01', 'MAIN LIBRARY', 'BANGALORE'),
@@ -94,12 +90,10 @@ INSERT INTO BOOK_LENDING VALUES
 ('B001', 'BR01', 'C102', '2017-02-10', '2017-02-24'),
 ('B002', 'BR01', 'C102', '2017-05-10', '2017-05-24');
 
--- ---------------------------------------------------------
--- 3. QUERIES
--- ---------------------------------------------------------
-
--- Q1. Retrieve details of all books in the library - Id, Title, Name of
--- Publisher, Authors, Number of copies in each branch etc.
+-- Q1. Retrieve details of all books
+-- in the library - Id, Title, Name of
+-- Publisher, Authors, Number of copies
+-- in each branch etc.
 SELECT B.BOOK_ID, B.TITLE, P.NAME AS PUBLISHER_NAME,
        A.AUTHOR_NAME, C.BRANCH_ID, C.NO_OF_COPIES
 FROM BOOK B, BOOK_AUTHORS A, BOOK_COPIES C, PUBLISHER P
@@ -107,26 +101,28 @@ WHERE B.BOOK_ID = A.BOOK_ID
 AND B.BOOK_ID = C.BOOK_ID
 AND B.PUBLISHER_NAME = P.NAME;
 
--- Q2. Get the particulars of borrowers who have borrowed 
--- more than 3 books, but from Jan 2017 to Jun 2017.
+-- Q2. Get the particulars of borrowers
+-- who have borrowed more than 3 books,
+-- but from Jan 2017 to Jun 2017.
 SELECT CARD_NO, COUNT(*) AS NO_OF_BOOKS
 FROM BOOK_LENDING
 WHERE DATE_OUT BETWEEN '2017-01-01' AND '2017-06-30'
 GROUP BY CARD_NO
 HAVING COUNT(*) > 3;
 
--- Q3. Delete a book in Book table. Update the contents of other tables 
--- to reflect this data manipulation operation.
--- First delete from child tables, then from main BOOK table, otherwise FK error comes
+-- Q3. Delete a book in Book table.
+-- Update the contents of other tables
+-- to reflect this data manipulation
+-- operation.
 DELETE FROM BOOK_LENDING WHERE BOOK_ID = 'B005';
 DELETE FROM BOOK_COPIES WHERE BOOK_ID = 'B005';
 DELETE FROM BOOK_AUTHORS WHERE BOOK_ID = 'B005';
 DELETE FROM BOOK WHERE BOOK_ID = 'B005';
 SELECT * FROM BOOK;
 
--- Q4. Partition the Book table based on year of publication. 
--- Demonstration as working with a simple query.alter.
-drop table if exists BOOK_PART;
+-- Q4. Partition the Book table
+-- based on year of publication.
+DROP TABLE IF EXISTS BOOK_PART;
 CREATE TABLE BOOK_PART (
     BOOK_ID VARCHAR(10),
     TITLE VARCHAR(50),
@@ -143,10 +139,12 @@ SELECT * FROM BOOK_PART PARTITION (p1);
 SELECT * FROM BOOK_PART PARTITION (p2);
 SELECT * FROM BOOK_PART PARTITION (p3);
 
--- Q5. Create a view of all books and its no of
--- copies that are currently available in the Library.
+-- Q5. Create a view of all books
+-- and its no of copies that are
+-- currently available in the Library.
 CREATE VIEW BOOK_AVAILABLE AS
 SELECT B.BOOK_ID, B.TITLE, C.BRANCH_ID, C.NO_OF_COPIES
 FROM BOOK B, BOOK_COPIES C
 WHERE B.BOOK_ID = C.BOOK_ID;
 SELECT * FROM BOOK_AVAILABLE;
+
