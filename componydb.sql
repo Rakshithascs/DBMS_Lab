@@ -1,0 +1,140 @@
+DROP DATABASE IF EXISTS CompanyDatabase;
+CREATE DATABASE CompanyDatabase;
+USE CompanyDatabase;
+
+CREATE TABLE EMPLOYEE (
+    SSN VARCHAR(10) PRIMARY KEY,
+    Name VARCHAR(30),
+    Address VARCHAR(50),
+    Sex VARCHAR(10),
+    Salary DECIMAL(10,2),
+    SuperSSN VARCHAR(10),
+    DNo INT
+);
+
+CREATE TABLE DEPARTMENT (
+    DNo INT PRIMARY KEY,
+    DName VARCHAR(30),
+    MgrSSN VARCHAR(10),
+    MgrStartDate DATE
+);
+
+CREATE TABLE DLOCATION (
+    DNo INT,
+    DLoc VARCHAR(30),
+    PRIMARY KEY (DNo, DLoc)
+);
+
+CREATE TABLE PROJECT (
+    PNo INT PRIMARY KEY,
+    PName VARCHAR(30),
+    PLocation VARCHAR(30),
+    DNo INT
+);
+
+CREATE TABLE WORKS_ON (
+    SSN VARCHAR(10),
+    PNo INT,
+    Hours DECIMAL(5,2),
+    PRIMARY KEY (SSN, PNo)
+);
+
+INSERT INTO DEPARTMENT VALUES
+(1, 'Accounts', 'E101', '2020-01-01'),
+(2, 'HR', 'E102', '2020-02-01'),
+(5, 'IT', 'E103', '2020-03-01'),
+(6, 'Sales', 'E104', '2020-04-01');
+
+INSERT INTO EMPLOYEE VALUES
+('E101', 'Krupa', 'BANGALORE', 'FEMALE', 700000, NULL, 1),
+('E102', 'Spandana', 'MYSORE', 'FEMALE', 650000, NULL, 2),
+('E103', 'Scott', 'BANGALORE', 'MALE', 800000, NULL, 5),
+('E104', 'Rahul', 'BANGALORE', 'MALE', 750000, NULL, 6),
+('E105', 'Kavya', 'BANGALORE', 'FEMALE', 620000, 'E103', 5),
+('E106', 'Ananya', 'BANGALORE', 'FEMALE', 580000, 'E103', 5),
+('E107', 'Bhavya', 'MYSORE', 'FEMALE', 700000, 'E103', 5),
+('E108', 'Pooja', 'BANGALORE', 'FEMALE', 550000, 'E103', 5),
+('E109', 'Megha', 'BANGALORE', 'FEMALE', 650000, 'E103', 5);
+
+INSERT INTO DLOCATION VALUES
+(1, 'BANGALORE'),
+(2, 'MYSORE'),
+(5, 'BANGALORE'),
+(6, 'BANGALORE');
+
+INSERT INTO PROJECT VALUES
+(101, 'Accounts System', 'BANGALORE', 1),
+(102, 'HR Portal', 'MYSORE', 2),
+(103, 'IoT', 'BANGALORE', 5),
+(104, 'AI System', 'BANGALORE', 5),
+(105, 'Sales App', 'BANGALORE', 6);
+
+INSERT INTO WORKS_ON VALUES
+('E101', 101, 20),
+('E102', 102, 25),
+('E103', 103, 30),
+('E103', 104, 25),
+('E105', 103, 20),
+('E105', 104, 15),
+('E106', 103, 20),
+('E107', 104, 20),
+('E104', 105, 30);
+
+-- Q1: Project numbers for Scott - as worker OR as manager
+SELECT P.PNo
+FROM PROJECT P, WORKS_ON W, EMPLOYEE E
+WHERE P.PNo = W.PNo
+AND W.SSN = E.SSN
+AND E.Name = 'Scott'
+UNION
+SELECT P.PNo
+FROM PROJECT P, DEPARTMENT D, EMPLOYEE E
+WHERE P.DNo = D.DNo
+AND D.MgrSSN = E.SSN
+AND E.Name = 'Scott';
+
+-- Q2: Show resulting salaries if IoT employees get 10% raise
+SELECT E.Name,
+       E.Salary AS OLD_SALARY,
+       E.Salary * 1.10 AS NEW_SALARY
+FROM EMPLOYEE E, WORKS_ON W, PROJECT P
+WHERE E.SSN = W.SSN
+AND W.PNo = P.PNo
+AND P.PName = 'IoT';
+
+-- Q3: SUM, MAX, MIN, AVG for Accounts dept
+SELECT SUM(E.Salary) AS TOTAL_SALARY,
+       MAX(E.Salary) AS MAX_SALARY,
+       MIN(E.Salary) AS MIN_SALARY,
+       AVG(E.Salary) AS AVG_SALARY
+FROM EMPLOYEE E, DEPARTMENT D
+WHERE E.DNo = D.DNo
+AND D.DName = 'Accounts';
+
+-- Q4: Employees who work on ALL projects of Dept 5 - NOT EXISTS
+SELECT E.Name
+FROM EMPLOYEE E
+WHERE NOT EXISTS (
+    SELECT P.PNo
+    FROM PROJECT P
+    WHERE P.DNo = 5
+    AND NOT EXISTS (
+        SELECT W.PNo
+        FROM WORKS_ON W
+        WHERE W.SSN = E.SSN
+        AND W.PNo = P.PNo
+    )
+);
+
+-- Q5: Dept with >5 employees, count Salary > 600000
+SELECT DNo,
+       COUNT(*) AS HIGH_SALARY_EMPLOYEES
+FROM EMPLOYEE
+WHERE Salary > 600000
+AND DNo IN (
+    SELECT DNo
+    FROM EMPLOYEE
+    GROUP BY DNo
+    HAVING COUNT(*) > 5
+)
+GROUP BY DNo;
