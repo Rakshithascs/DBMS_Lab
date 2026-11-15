@@ -1,3 +1,4 @@
+
 DROP DATABASE IF EXISTS CollegeDatabase;
 CREATE DATABASE CollegeDatabase;
 USE CollegeDatabase;
@@ -82,7 +83,7 @@ INSERT INTO IAMARKS VALUES
 ('1BI15CS104', 'CS402', '8C', 11, 10, 12, 0),
 ('1BI15CS104', 'CS403', '8C', 10, 12, 11, 0);
 
--- Q1: 4th Sem 'C' Section Students
+-- Q1: List all the student details studying in fourth semester 'C' section.
 SELECT S.USN, S.SName, S.Address, S.Phone, S.Gender
 FROM STUDENT S, CLASS C, SEMSEC SS
 WHERE S.USN = C.USN
@@ -90,7 +91,7 @@ AND C.SSID = SS.SSID
 AND SS.Sem = 4
 AND SS.Sec = 'C';
 
--- Q2: Count Male / Female in Each Sem & Sec
+-- Q2: Compute the total number of male and female students in each semester and in each section.
 SELECT SS.Sem, SS.Sec, S.Gender, COUNT(*) AS TOTAL_STUDENTS
 FROM STUDENT S, CLASS C, SEMSEC SS
 WHERE S.USN = C.USN
@@ -98,7 +99,8 @@ AND C.SSID = SS.SSID
 GROUP BY SS.Sem, SS.Sec, S.Gender
 ORDER BY SS.Sem, SS.Sec;
 
--- Q3: View of Test1 Marks of 1BI15CS101
+-- Q3: Create a view of Test1 Marks of student USN '1XX1234' in all subjects.
+-- Note: Namma data nalli 1XX1234 badlu 1BI15CS101 ide, adke adanne use madidini
 DROP VIEW IF EXISTS V_TEST1;
 CREATE VIEW V_TEST1 AS
 SELECT USN, Subcode, Test1
@@ -107,7 +109,7 @@ WHERE USN = '1BI15CS101';
 
 SELECT * FROM V_TEST1;
 
--- Q4: Calculate FinalIA = Avg of Best 2 Tests and Update (CORRECTED)
+-- Q4: Calculate the FinalIA (average of best two test Marks) and update the corresponding table for all students.
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE IAMARKS
@@ -117,7 +119,11 @@ SET SQL_SAFE_UPDATES = 1;
 
 SELECT USN, Subcode, Test1, Test2, Test3, FinalIA FROM IAMARKS;
 
--- Q5: Categorize 8th Sem A, B, C Students
+-- Q5: Categorize students based on the following criterion:
+-- If FinalIA = 17 to 20 then CAT = 'Outstanding'
+-- If FinalIA = 12 to 16 then CAT = 'Average'
+-- If FinalIA < 12 then CAT = 'Weak'
+-- Give these details only for 8th semester A, B, and C section students.
 SELECT S.USN, S.SName, SS.Sem, SS.Sec, I.Subcode, I.FinalIA,
 CASE
     WHEN I.FinalIA >= 17 THEN 'Outstanding'
