@@ -76,11 +76,11 @@ INSERT INTO RATING VALUES
 (104, 4),
 (105, 5);
 
--- Q1: Movies directed by 'ABCD'
+-- Q1: List the titles of all movies directed by 'ABCD'.
 SELECT Mov_Title FROM MOVIES
 WHERE Dir_id IN (SELECT Dir_id FROM DIRECTOR WHERE Dir_Name = 'ABCD');
 
--- Q2: Movies where actor acted in 2 or more movies
+-- Q2: Find the movie names where one or more actors acted in two or more movies.
 SELECT DISTINCT M.Mov_Title
 FROM MOVIES M, MOVIE_CAST C
 WHERE M.Mov_id = C.Mov_id
@@ -88,7 +88,7 @@ AND C.Act_id IN (
     SELECT Act_id FROM MOVIE_CAST GROUP BY Act_id HAVING COUNT(Mov_id) >= 2
 );
 
--- Q3: Actors before 2000 AND after 2015 - JOIN
+-- Q3: List all actors who acted in a movie before 2000 and also in a movie after 2015 (use JOIN operation).
 SELECT DISTINCT A.Act_Name
 FROM ACTOR A
 JOIN MOVIE_CAST C1 ON A.Act_id = C1.Act_id
@@ -96,14 +96,14 @@ JOIN MOVIES M1 ON C1.Mov_id = M1.Mov_id AND M1.Mov_Year < 2000
 JOIN MOVIE_CAST C2 ON A.Act_id = C2.Act_id
 JOIN MOVIES M2 ON C2.Mov_id = M2.Mov_id AND M2.Mov_Year > 2015;
 
--- Q4: Title and highest stars, sorted by title
+-- Q4: Find the title of movies and number of stars for each movie that has at least one rating and find the highest number of stars that movie received. Sort the result by movie title.
 SELECT M.Mov_Title, MAX(R.Rev_Stars) AS Highest_Stars
 FROM MOVIES M, RATING R
 WHERE M.Mov_id = R.Mov_id
 GROUP BY M.Mov_Title
 ORDER BY M.Mov_Title;
 
--- Q5: Update rating of XYZ movies to 5
+-- Q5: Update rating of all movies directed by 'XYZ' to 5.
 UPDATE RATING SET Rev_Stars = 5
 WHERE Mov_id IN (
     SELECT Mov_id FROM MOVIES
